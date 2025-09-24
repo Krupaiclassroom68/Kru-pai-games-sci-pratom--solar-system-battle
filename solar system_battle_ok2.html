@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Science Battle — Solar System Edition (40 ข้อ)</title>
+<style>
+  :root{
+    --bg:#f0f7ff;
+    --card:#ffffff;
+    --ink:#0f172a;
+    --muted:#64748b;
+    --brand:#2563eb;
+    --accent:#60a5fa;
+    --ok:#16a34a;
+    --bad:#ef4444;
+    --shadow:0 10px 30px rgba(0,0,0,.08);
+    --radius:22px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:var(--ink);font-family:Prompt,Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px}
+  .badge{font-size:14px;color:#fff;background:var(--brand);padding:6px 12px;border-radius:999px;box-shadow:var(--shadow)}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+  .center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
+  .title{font-size:clamp(32px,5vw,48px);font-weight:900}
+  .subtitle{color:var(--muted);font-size:18px}
+  input{padding:12px 14px;border:1.5px solid #c7d2fe;border-radius:12px;font-size:18px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  button{appearance:none;border:0;border-radius:16px;padding:16px 22px;font-weight:800;cursor:pointer;box-shadow:var(--shadow);font-size:18px}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-ghost{background:#fff;color:var(--brand);border:2px solid var(--brand)}
+  .hud{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .pill{background:#eaf1ff;border:1px solid #c7d2fe;color:#1e3a8a;padding:8px 14px;border-radius:999px;font-weight:800}
+  .score{background:#eaf7ff;border-color:#bae6fd;color:#0c4a6e}
+  .clockwrap{display:flex;align-items:center;gap:10px}
+  .clock{position:relative;width:64px;height:64px}
+  .clock svg{transform:rotate(-90deg)}
+  .clock .ring{stroke:#dbeafe;stroke-width:8;fill:none}
+  .clock .bar{stroke:var(--accent);stroke-width:8;stroke-linecap:round;fill:none;transition:stroke-dashoffset .1s linear}
+  .clock .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:#1d4ed8;font-size:20px}
+  .q{font-size:26px;font-weight:900;margin:10px 0 12px;text-align:center}
+  .options{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:720px){.options{grid-template-columns:1fr 1fr}}
+  .opt{position:relative;border:2.5px solid #c7d2fe;background:#fff;border-radius:18px;padding:18px 16px;text-align:center;font-size:22px;font-weight:900;cursor:pointer}
+  .opt:hover{filter:brightness(1.02)}
+  .opt.disabled{pointer-events:none;opacity:.9}
+  .opt.correct{border-color:var(--ok);background:#ecfdf5}
+  .opt.wrong{border-color:var(--bad);background:#fef2f2}
+  .fb{margin-top:6px;font-size:16px;font-weight:900}
+  .ok{color:var(--ok)}
+  .bad{color:var(--bad)}
+  .big-score{font-size:clamp(34px,6vw,56px);font-weight:900}
+  .trophy{font-size:42px;line-height:1}
+  .stat{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .board{margin-top:14px;display:grid;grid-template-columns:1fr;gap:10px}
+  .mini{background:#fff;border:1px solid #c7d2fe;border-radius:16px;padding:12px;text-align:center}
+  .mini b{display:block;margin-bottom:4px}
+  .mini .date{font-size:12px;color:#9ca3af}
+  .wm{position:fixed;inset:auto 12px 12px auto;background:#1e3a8a;color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;opacity:.9;box-shadow:var(--shadow);z-index:40}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🚀🌞 <span style="font-weight:900">Kru Pai Classroom</span></div>
+      <span class="badge">Science Battle — Solar System</span>
+    </header>
+
+    <section id="screen-start" class="card center">
+      <div class="title" style="color:var(--brand)">Solar System Battle ⚡</div>
+      <div class="subtitle">ดาวเคราะห์ • ดวงอาทิตย์ • ปรากฏการณ์ต่าง ๆ — <b>40 ข้อ</b> | นับถอยหลัง 5 วิ/ข้อ | สุ่มคำตอบ | วิ่งอัตโนมัติ</div>
+      <div class="row">
+        <input id="player" type="text" placeholder="ใส่ชื่อเล่น (ไม่บังคับ)" />
+        <button class="btn-primary" onclick="startGame()">เริ่มต่อสู้</button>
+      </div>
+
+      <div class="board" id="scoreBoard">
+        <div class="mini" id="sbSolar"><b>Solar System Battle</b><div>ยังไม่ได้เล่น</div></div>
+      </div>
+    </section>
+
+    <section id="screen-game" class="card" style="display:none">
+      <div class="hud">
+        <div class="left" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span id="progress" class="pill">ข้อ 1/40</span>
+          <span id="scorePill" class="pill score">คะแนน 0</span>
+          <span id="playerNameHUD" class="pill"></span>
+        </div>
+        <div class="right clockwrap">
+          <div class="clock" aria-label="ตัวจับเวลา">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle class="ring" cx="32" cy="32" r="27" />
+              <circle id="bar" class="bar" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="0" />
+            </svg>
+            <div id="num" class="num">5</div>
+          </div>
+        </div>
+      </div>
+      <div id="question" class="q">คำถามจะอยู่ที่นี่</div>
+      <div class="options">
+        <button id="optA" class="opt" onclick="choose('A')"></button>
+        <button id="optB" class="opt" onclick="choose('B')"></button>
+      </div>
+    </section>
+
+    <section id="screen-end" class="card center" style="display:none">
+      <div class="title" style="color:var(--brand)">สรุปผลการต่อสู้</div>
+      <div id="finalName" class="subtitle"></div>
+      <div id="finalScore" class="big-score"></div>
+      <div id="finalMedal" class="trophy"></div>
+      <div class="stat">
+        <span id="statPercent" class="pill"></span>
+        <span id="statRemark" class="pill"></span>
+      </div>
+      <div class="row">
+        <button class="btn-primary" onclick="restart()">ลุยซ้ำ</button>
+        <button class="btn-ghost" onclick="toStart()">กลับหน้าแรก</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="wm">Kru Pai Classroom</div>
+
+<script>
+// =============== คำถาม Solar System (40 ข้อ) ===============
+const SOLAR = [
+  { q:"ดาวเคราะห์ที่มีวงแหวนเด่นชัดคือ", A:"เสาร์", B:"พุธ", correct:"A" },
+  { q:"ดาวเคราะห์ที่มีขนาดใหญ่ที่สุด", A:"พฤหัสบดี", B:"เสาร์", correct:"A" },
+  { q:"ดาวเคราะห์สีแดงคือ", A:"อังคาร", B:"ศุกร์", correct:"A" },
+  { q:"ดาวเคราะห์ที่ร้อนที่สุด (เฉลี่ยพื้นผิว)", A:"ศุกร์", B:"พุธ", correct:"A" },
+  { q:"กลางวัน–กลางคืนเกิดจาก", A:"การหมุนรอบตัวเองของโลก", B:"การโคจรรอบดวงอาทิตย์", correct:"A" },
+  { q:"ฤดูกาลเกิดจาก", A:"แกนเอียงและการโคจรรอบดวงอาทิตย์", B:"ดวงจันทร์โคจรรอบโลก", correct:"A" },
+  { q:"สุริยุปราคาคือ", A:"ดวงจันทร์บังดวงอาทิตย์", B:"โลกบังดวงจันทร์", correct:"A" },
+  { q:"จันทรุปราคาคือ", A:"โลกบังดวงจันทร์", B:"ดวงจันทร์บังดวงอาทิตย์", correct:"A" },
+  { q:"น้ำขึ้น–น้ำลงหลัก ๆ เกิดจากแรงโน้มถ่วงของ", A:"ดวงจันทร์", B:"ดาวพุธ", correct:"A" },
+  { q:"ดาวเคราะห์ที่ใกล้ดวงอาทิตย์ที่สุด", A:"พุธ", B:"ศุกร์", correct:"A" },
+  { q:"ดาวเคราะห์ที่ไกลดวงอาทิตย์ที่สุด", A:"เนปจูน", B:"ยูเรนัส", correct:"A" },
+  { q:"วันยาวกว่าปีของตนเองคือดาว", A:"ศุกร์", B:"พุธ", correct:"A" },
+  { q:"แกนเอียงมากที่สุด", A:"ยูเรนัส", B:"เนปจูน", correct:"A" },
+  { q:"พายุจุดแดงใหญ่พบที่", A:"พฤหัสบดี", B:"เสาร์", correct:"A" },
+  { q:"โลกมีดวงจันทร์จำนวน", A:"1 ดวง", B:"2 ดวง", correct:"A" },
+  { q:"ดาวเคราะห์ชั้นหินอยู่บริเวณ", A:"ด้านในใกล้ดวงอาทิตย์", B:"ด้านนอกไกลดวงอาทิตย์", correct:"A" },
+  { q:"ปรากฏการณ์ออโรราเกี่ยวข้องกับ", A:"อนุภาคจากดวงอาทิตย์ชนชั้นบรรยากาศ", B:"น้ำแข็งในเมฆสะท้อนแสง", correct:"A" },
+  { q:"หางดาวหางชี้ไปทิศทางใด", A:"ออกห่างจากดวงอาทิตย์", B:"เข้าหาดวงอาทิตย์", correct:"A" },
+  { q:"น้ำขึ้นสูงมาก (spring tide) เกิดเมื่อ", A:"ดวงอาทิตย์–ดวงจันทร์–โลกอยู่แนวเดียวกัน", B:"ดวงอาทิตย์ตั้งฉากกับดวงจันทร์", correct:"A" },
+  { q:"ดาวพุธกลางวันร้อนกลางคืนหนาวจัดเพราะ", A:"บรรยากาศบางมาก", B:"อยู่ไกลดวงอาทิตย์", correct:"A" },
+  { q:"พลูโตจัดเป็น", A:"ดาวเคราะห์แคระ", B:"ดาวเคราะห์", correct:"A" },
+  { q:"พลังงานของดวงอาทิตย์เกิดจาก", A:"นิวเคลียร์ฟิวชัน", B:"นิวเคลียร์ฟิชชัน", correct:"A" },
+  { q:"แสงอาทิตย์เดินทางถึงโลกประมาณ", A:"ราว 8 นาที", B:"ราว 1 วินาที", correct:"A" },
+  { q:"วิถีโคจรของโลกมีรูปร่าง", A:"วงรี", B:"วงกลมสมบูรณ์", correct:"A" },
+  { q:"จันทรุปราคาเกิดได้ในช่วง", A:"ข้างขึ้น 15 ค่ำ (เต็มดวง)", B:"ข้างแรม 15 ค่ำ", correct:"A" },
+  { q:"ข้างขึ้น–ข้างแรมเกิดจาก", A:"แสงอาทิตย์สะท้อนจากดวงจันทร์", B:"ดวงจันทร์เรืองแสงเอง", correct:"A" },
+  { q:"ดาวศุกร์มีลักษณะ", A:"หมุนช้ามากและทิศทางพิเศษ", B:"หมุนเร็วมาก", correct:"A" },
+  { q:"โลกใช้เวลาโคจรรอบดวงอาทิตย์ประมาณ", A:"365 วัน", B:"30 วัน", correct:"A" },
+  { q:"องค์ประกอบหลักของดวงอาทิตย์คือ", A:"ไฮโดรเจน", B:"ออกซิเจน", correct:"A" },
+  { q:"ภูเขาไฟโล่ยักษ์ Olympus Mons อยู่บน", A:"อังคาร", B:"พุธ", correct:"A" },
+  { q:"ดาวพุธมีบรรยากาศหนาหรือไม่", A:"ไม่มี/บางมาก", B:"หนามาก", correct:"A" },
+  { q:"เงามืดจากดวงจันทร์ตกบนโลกเกิด", A:"สุริยุปราคา", B:"จันทรุปราคา", correct:"A" },
+  { q:"แถบดาวเคราะห์น้อยหลักอยู่ระหว่าง", A:"อังคาร–พฤหัสบดี", B:"โลก–อังคาร", correct:"A" },
+  { q:"ดาวเคราะห์ที่หมุนรอบตัวเองเร็วมาก (วันสั้น)", A:"พฤหัสบดี", B:"ศุกร์", correct:"A" },
+  { q:"แกนโลกเอียงประมาณ", A:"23.5°", B:"5°", correct:"A" },
+  { q:"พายุสุริยะอาจกระทบ", A:"สัญญาณสื่อสาร/ดาวเทียม", B:"การเกิดแผ่นดินไหวโดยตรง", correct:"A" },
+  { q:"ดาวศุกร์ร้อนมากเพราะ", A:"ชั้นบรรยากาศคาร์บอนไดออกไซด์หนา (เรือนกระจก)", B:"อยู่ใกล้ดวงอาทิตย์ที่สุด", correct:"A" },
+  { q:"ดาวเนปจูนมีชื่อเสียงเรื่อง", A:"ลมแรงมาก", B:"ภูเขาไฟยักษ์", correct:"A" },
+  { q:"ดาวศุกร์สว่างโดดเด่นบนท้องฟ้าเพราะ", A:"สะท้อนแสงดีและอยู่ใกล้โลก", B:"ปล่อยแสงเอง", correct:"A" },
+  { q:"เรามองเห็นด้านเดียวของดวงจันทร์เพราะ", A:"คาบหมุนเท่าคาบโคจร", B:"ดวงจันทร์ไม่หมุนรอบตัวเอง", correct:"A" }
+];
+
+// =============== ตัวเกม ===============
+let idx = 0;
+let score = 0;
+let intervalId = null;
+let timeLeft = 5; // วินาทีต่อข้อ
+let CURRENT = SOLAR; // ใช้ชุด Solar
+let currentPlayer = "";
+const CIRC = 2*Math.PI*27; // r=27
+
+// DOM
+const elStart  = document.getElementById('screen-start');
+const elGame   = document.getElementById('screen-game');
+const elEnd    = document.getElementById('screen-end');
+const qEl      = document.getElementById('question');
+const optA     = document.getElementById('optA');
+const optB     = document.getElementById('optB');
+const progress = document.getElementById('progress');
+const scorePill= document.getElementById('scorePill');
+const numEl    = document.getElementById('num');
+const barEl    = document.getElementById('bar');
+barEl.setAttribute('stroke-dasharray', CIRC.toFixed(1));
+
+// โหลดสกอร์บอร์ดเมื่อเปิดหน้า
+window.addEventListener('DOMContentLoaded', loadScoreboard);
+
+function toStart(){
+  clearInterval(intervalId);
+  elEnd.style.display='none';
+  elGame.style.display='none';
+  elStart.style.display='flex';
+  loadScoreboard();
+}
+
+function startGame(){
+  idx = 0; score = 0; CURRENT = SOLAR; // ใช้ชุดคำถามโหมดนี้
+  elStart.style.display='none';
+  elEnd.style.display='none';
+  elGame.style.display='block';
+  currentPlayer = (document.getElementById('player').value||'').trim();
+  document.getElementById('playerNameHUD').textContent = currentPlayer ? `👤 ${currentPlayer}` : '';
+  loadQuestion();
+}
+
+function restart(){ startGame(); }
+
+function loadQuestion(){
+  clearInterval(intervalId);
+  timeLeft = 5;
+  updateClock(1);
+
+  const item = CURRENT[idx];
+  progress.textContent = `ข้อ ${idx+1}/${CURRENT.length}`;
+  scorePill.textContent = `คะแนน ${score}`;
+  qEl.textContent = item.q;
+
+  const opts = [ {id:'A', text:item.A}, {id:'B', text:item.B} ];
+  if(Math.random() < 0.5) opts.reverse();
+  optA.className = 'opt';
+  optB.className = 'opt';
+  optA.innerHTML = `<div>🅰️ ${escapeHTML(opts[0].text)}</div><div id="fbA" class="fb"></div>`;
+  optB.innerHTML = `<div>🅱️ ${escapeHTML(opts[1].text)}</div><div id="fbB" class="fb"></div>`;
+  optA.dataset.correct = (opts[0].id === item.correct);
+  optB.dataset.correct = (opts[1].id === item.correct);
+
+  intervalId = setInterval(()=>{
+    timeLeft -= 0.1;
+    if(timeLeft <= 0){ clearInterval(intervalId); handleAnswer(null,true); }
+    else { updateClock(timeLeft/5); numEl.textContent = String(Math.ceil(timeLeft)); }
+  },100);
+}
+
+function updateClock(pct){
+  const offset = (1-pct) * CIRC;
+  barEl.setAttribute('stroke-dashoffset', offset.toFixed(1));
+  numEl.textContent = String(Math.ceil(timeLeft));
+}
+
+function choose(letter){ handleAnswer(letter,false); }
+
+function handleAnswer(letter, timeout){
+  clearInterval(intervalId);
+  const fbA = document.getElementById('fbA');
+  const fbB = document.getElementById('fbB');
+  optA.classList.add('disabled');
+  optB.classList.add('disabled');
+
+  if(timeout){
+    if(optA.dataset.correct === 'true'){ optA.classList.add('correct'); fbA.innerHTML = "<span class='bad'>⏳ หมดเวลา</span>"; }
+    else { optB.classList.add('correct'); fbB.innerHTML = "<span class='bad'>⏳ หมดเวลา</span>"; }
+    return setTimeout(nextQuestion, 850);
+  }
+
+  let chosen = (letter==='A') ? optA : optB;
+  let other  = (letter==='A') ? optB : optA;
+  if(chosen.dataset.correct === 'true'){
+    chosen.classList.add('correct');
+    chosen.innerHTML += "<div class='fb ok'>🤩 ว้าวววว ถูก!</div>";
+    score++;
+  }else{
+    chosen.classList.add('wrong');
+    chosen.innerHTML += "<div class='fb bad'>😖 ว้ายยยย ผิด!</div>";
+    other.classList.add('correct');
+  }
+  scorePill.textContent = `คะแนน ${score}`;
+  setTimeout(nextQuestion, 850);
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx >= CURRENT.length){ finish(); }
+  else { loadQuestion(); }
+}
+
+function finish(){
+  elGame.style.display='none';
+  elEnd.style.display='flex';
+  const percent = Math.round((score/CURRENT.length)*100);
+  document.getElementById('finalName').textContent = currentPlayer ? `ผู้เล่น: ${currentPlayer}` : '';
+  document.getElementById('finalScore').textContent = `${score} / ${CURRENT.length}`;
+
+  const medalEl = document.getElementById('finalMedal');
+  const remarkEl= document.getElementById('statRemark');
+  if(percent === 100){
+    medalEl.textContent = '🥇 โล่ทองคำ — Perfect!';
+    remarkEl.textContent = 'สุดจัด! นักบินอวกาศตัวจริง';
+  } else if(percent >= 90){
+    medalEl.textContent = '🥈 โล่เงิน — Elite';
+    remarkEl.textContent = 'เฉียบมาก เหลืออีกนิดเดียว!';
+  } else if(percent >= 80){
+    medalEl.textContent = '🥉 โล่ทองแดง — Pro';
+    remarkEl.textContent = 'ยอดเยี่ยม! ไปต่อให้สุด';
+  } else {
+    medalEl.textContent = '🎯 สู้ต่อ!';
+    remarkEl.textContent = 'กลับไปยิงดาวรอบใหม่!';
+  }
+  document.getElementById('statPercent').textContent = `คิดเป็น ${percent}%`;
+
+  // ===== บันทึกลง Scoreboard (localStorage) =====
+  const payload = { player: currentPlayer, raw: score, total: CURRENT.length, percent, date: new Date().toLocaleString('th-TH') };
+  try{ localStorage.setItem('sb_solar', JSON.stringify(payload)); }catch(e){}
+}
+
+// ===== แสดงผล Scoreboard ที่หน้าแรก =====
+function loadScoreboard(){
+  const el = document.getElementById('sbSolar');
+  const data = safeParse(localStorage.getItem('sb_solar'));
+  if(data){
+    const name = data.player ? ` — 👤 ${escapeHTML(data.player)}` : '';
+    el.innerHTML = `<b>Solar System Battle</b><div>${data.raw}/${data.total} (${data.percent}%) ${medalEmoji(data.percent)}${name}</div><div class=\"date\">${data.date}</div>`;
+  }else{
+    el.innerHTML = `<b>Solar System Battle</b><div>ยังไม่ได้เล่น</div>`;
+  }
+}
+
+function medalEmoji(p){ if(p===100) return '🥇'; if(p>=90) return '🥈'; if(p>=80) return '🥉'; return ''; }
+function safeParse(s){ try{ return JSON.parse(s); }catch(e){ return null; } }
+function escapeHTML(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+</script>
+</body>
+</html>
